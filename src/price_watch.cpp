@@ -8,6 +8,7 @@ void price_watch_init()
     ttgo->openBL();
     ttgo->enableTouchIRQ();
     ttgo->lvgl_begin();
+    ttgo->enableLDO3();
 
     ttgo->motor_begin();
 }
