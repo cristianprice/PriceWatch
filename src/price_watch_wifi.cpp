@@ -1,9 +1,9 @@
 #include <WiFi.h>
 #include "price_watch.h"
 
-volatile bool wifiApConnected;
-volatile bool wifiStaConnected;
-volatile WifiConfig currentWifiConfig;
+volatile bool wifiApConnected = false;
+volatile bool wifiStaConnected = false;
+WifiConfig currentWifiConfig;
 
 void wiFiEventHandler(WiFiEvent_t event)
 {
@@ -64,16 +64,16 @@ void wiFiEventHandler(WiFiEvent_t event)
     }
 }
 
-void start_wifi(const WifiConfig &config)
+void start_wifi(const WifiConfig *config)
 {
     WiFi.mode(WIFI_AP_STA);
     WiFi.onEvent(wiFiEventHandler);
     /* Start STAtion */
-    if (config.start_sta)
-        WiFi.begin(config.sta_ssid, config.sta_password);
+    if (config->start_sta)
+        WiFi.begin(config->sta_ssid, config->sta_password);
     /* Start Access Point */
-    if (config.start_ap)
-        WiFi.softAP(config.ap_ssid, config.ap_password);
+    if (config->start_ap)
+        WiFi.softAP(config->ap_ssid, config->ap_password);
 }
 void stop_wifi(bool stop_sta, bool stop_ap)
 {

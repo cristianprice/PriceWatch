@@ -1,96 +1,54 @@
 #include "price_watch.h"
 
-/* Font declaration */
-LV_FONT_DECLARE(lv_font_montserrat_14);
+static lv_obj_t *time_label;
+static lv_obj_t *date_label;
 
-/* Styles */
-static lv_style_t style_arc_bg;
-static lv_style_t style_arc_indic;
-static lv_style_t style_arc_label;
-static lv_style_t style_knob;
+LV_FONT_DECLARE(lv_font_montserrat_48);
+LV_FONT_DECLARE(lv_font_montserrat_16);
 
-/* ---------- Main screen creation ---------- */
-
-void create_main_screen_watch(lv_obj_t *parent)
+void create_main_screen()
 {
-    LV_UNUSED(parent);
+    lv_obj_t *scr = lv_obj_create(NULL, NULL);
+    lv_scr_load(scr);
 
-    lv_obj_t *scr = lv_scr_act();
+    /* ---------- HEADER (15%) ---------- */
+    lv_obj_t *header = lv_cont_create(scr, NULL);
+    lv_obj_set_size(header, 240, 36); // 15% of 240
+    lv_obj_align(header, NULL, LV_ALIGN_IN_TOP_MID, 0, 0);
+    lv_cont_set_layout(header, LV_LAYOUT_OFF);
 
-    lv_coord_t sw = lv_obj_get_width(scr);
-    lv_coord_t sh = lv_obj_get_height(scr);
+    /* ---------- CONTENT (85%) ---------- */
+    lv_obj_t *content = lv_cont_create(scr, NULL);
+    lv_obj_set_size(content, 240, 204);
+    lv_obj_align(content, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+    lv_cont_set_layout(content, LV_LAYOUT_OFF);
 
-    const lv_coord_t arc_spacing = 5;
-    const lv_coord_t arc_size = (sw / 3) - (arc_spacing * 2);
+    /* ---------- TIME LABEL (LARGE) ---------- */
+    time_label = lv_label_create(content, NULL);
+    lv_label_set_text(time_label, "12:34");
+    lv_obj_align(time_label, NULL, LV_ALIGN_CENTER, 0, -20);
 
-    lv_coord_t total_width = (3 * arc_size) + (2 * arc_spacing);
-    lv_coord_t start_x = (sw - total_width) / 2;
-    lv_coord_t y_pos = (sh - arc_size) / 2;
+    lv_obj_set_style_local_text_font(
+        time_label,
+        LV_LABEL_PART_MAIN,
+        LV_STATE_DEFAULT,
+        &lv_font_montserrat_48);
 
-    /* ---------- Initialize styles ---------- */
+    /* ---------- DATE LABEL (SMALL) ---------- */
+    date_label = lv_label_create(content, NULL);
+    lv_label_set_text(date_label, "2026-01-01");
+    lv_obj_align(date_label, time_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
 
-    /* Background arc */
-    lv_style_init(&style_arc_bg);
-    lv_style_set_line_width(&style_arc_bg, LV_STATE_DEFAULT, 6);
-    lv_style_set_line_color(&style_arc_bg, LV_STATE_DEFAULT, LV_COLOR_WHITE);
+    lv_obj_set_style_local_text_font(
+        date_label,
+        LV_LABEL_PART_MAIN,
+        LV_STATE_DEFAULT,
+        &lv_font_montserrat_16);
+};
 
-    /* Indicator arc (slim blue) */
-    lv_style_init(&style_arc_indic);
-    lv_style_set_line_width(&style_arc_indic, LV_STATE_DEFAULT, 4);
-    lv_style_set_line_color(&style_arc_indic, LV_STATE_DEFAULT, LV_COLOR_RED);
-    lv_style_set_line_rounded(&style_arc_indic, LV_STATE_DEFAULT, true);
-
-    /* Label inside arc */
-    lv_style_init(&style_arc_label);
-    lv_style_set_text_font(&style_arc_label, LV_STATE_DEFAULT, &lv_font_montserrat_28);
-    lv_style_set_text_color(&style_arc_label, LV_STATE_DEFAULT, LV_COLOR_RED);
-
-    /* Knob hidden */
-    lv_style_init(&style_knob);
-    lv_style_set_bg_opa(&style_knob, LV_STATE_DEFAULT, LV_OPA_TRANSP);
-    lv_style_set_border_width(&style_knob, LV_STATE_DEFAULT, 0);
-    lv_style_set_pad_all(&style_knob, LV_STATE_DEFAULT, 0);
-
-    /* ---------- Create arcs ---------- */
-
-    for (uint8_t i = 0; i < 3; i++)
-    {
-        lv_obj_t *arc = lv_arc_create(scr, NULL);
-
-        lv_obj_set_size(arc, arc_size, arc_size);
-        lv_obj_set_pos(
-            arc,
-            start_x + i * (arc_size + arc_spacing),
-            y_pos);
-
-        lv_arc_set_bg_angles(arc, 0, 360);
-        lv_arc_set_angles(arc, 0, 270);
-        lv_arc_set_value(arc, 0);
-
-        /* Apply styles */
-        lv_obj_add_style(arc, LV_ARC_PART_BG, &style_arc_bg);
-        lv_obj_add_style(arc, LV_ARC_PART_INDIC, &style_arc_indic);
-        lv_obj_add_style(arc, LV_ARC_PART_KNOB, &style_knob);
-
-        /* Label inside arc */
-        lv_obj_t *label = lv_label_create(arc, NULL);
-        lv_label_set_text(label, "00");
-        lv_style_set_text_font(&style_arc_label, LV_STATE_DEFAULT, &lv_font_montserrat_14);
-        lv_obj_add_style(label, LV_LABEL_PART_MAIN, &style_arc_label);
-        lv_obj_align(label, arc, LV_ALIGN_CENTER, 0, 0);
-
-        /* Target values per arc */
-        uint8_t value;
-        if (i == 0)
-            value = 25;
-        else if (i == 1)
-            value = 60;
-        else
-            value = 90;
-
-        /* Update label */
-        char buf[5];
-        lv_snprintf(buf, sizeof(buf), "%02d", value);
-        lv_label_set_text(label, buf);
-    }
+// Call this periodically to update time & date
+void update_time_date_watch(const char *time_str, const char *date_str)
+{
+    lv_label_set_text(time_label, time_str);
+    lv_label_set_text(date_label, date_str);
 }

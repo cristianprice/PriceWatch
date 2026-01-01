@@ -11,7 +11,7 @@ void setup()
   price_watch_init();
 
   // Initialize the main screen
-  create_main_screen_watch(nullptr);
+  create_main_screen();
 }
 
 void loop()
