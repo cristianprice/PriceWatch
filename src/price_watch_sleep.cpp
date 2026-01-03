@@ -8,8 +8,8 @@ void enter_deep_sleep()
 {
     ttgo->shake();
     ttgo->closeBL();
-    ttgo->powerOff();
-    ttgo->shutdown();
+    // ttgo->powerOff();
+    // ttgo->shutdown();
 
     // Enter deep sleep
     esp_deep_sleep_start();

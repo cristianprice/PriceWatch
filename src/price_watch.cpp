@@ -14,6 +14,7 @@ void price_watch_init()
     ttgo->enableLDO3();
 
     ttgo->motor_begin();
+    ttgo->shake();
 
     // Config wifi
     currentWifiConfig.start_sta = true;
@@ -35,7 +36,9 @@ void price_watch_init()
 void price_watch_loop()
 {
     update_time_date_watch(local_time_get_time_str(), local_time_get_date_str());
+    set_battery_level(ttgo->power->getBattPercentage());
+    set_wifi_connected(wifiStaConnected);
 
     lv_task_handler();
-    delay(5);
+    delay(15);
 }
